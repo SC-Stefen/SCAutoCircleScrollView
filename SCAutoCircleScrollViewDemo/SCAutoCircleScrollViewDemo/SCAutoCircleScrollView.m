@@ -28,8 +28,6 @@
         
         [self initPageControlWithFrame:pageControlFrame andScrollViewsWithFrame:scrollViewFrame];
         
-        
-        
     }
     
     return  self;
