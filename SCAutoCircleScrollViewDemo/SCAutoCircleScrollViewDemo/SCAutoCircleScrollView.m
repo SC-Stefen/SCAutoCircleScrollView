@@ -10,13 +10,6 @@
 
 @implementation SCAutoCircleScrollView
 
-- (id)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-    }
-    return self;
-}
 
 - (id)initThePageControlOnScrollViewWithFrame : (CGRect)pageControlFrame andAutoCircleScrollViewWithFrame : (CGRect)scrollViewFrame withViewsArray : (NSArray*)viewsArray withTimeInterval : (NSTimeInterval)timeInterval {
     
@@ -52,6 +45,8 @@
     //初始化ScrollView
     
     _autoCircleScrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, scrollViewWidth, scrollViewHeight)];
+    
+    _autoCircleScrollView.backgroundColor = [UIColor redColor];
     _autoCircleScrollView.delegate = self;
     _autoCircleScrollView.showsVerticalScrollIndicator = NO;
     _autoCircleScrollView.showsHorizontalScrollIndicator = NO;
@@ -60,11 +55,6 @@
     
     
     [self addSubview:_autoCircleScrollView];
-    
-    for (int j = 0; j < [scrollViewSourceArray count]; j++) {
-        
-        NSLog(@"[scrollViewSourceArray ojectAtIndex] = %@", [scrollViewSourceArray objectAtIndex:j]);
-    }
     
     
     //将要自动循环的视图(UIImageView)添加到ScrollView上
@@ -98,7 +88,7 @@
     [self addSubview:_pageControl];
     
     //添加一个定时器，用于scrollView自动循环
-    timer = [NSTimer scheduledTimerWithTimeInterval:scheduledtimeInterval target:self selector:@selector(scrollToNextPageautomatically:) userInfo:nil repeats:YES];
+    timer = [NSTimer scheduledTimerWithTimeInterval:scheduledtimeInterval target:self selector:@selector(scrollToNextPageAutomatically:) userInfo:nil repeats:YES];
     
     
     //添加一个点击手势，如果ScrollView设置的是可以点击状态，则触发响应的方法
@@ -111,7 +101,7 @@
 
 
 
--(void)scrollToNextPageautomatically:(id)sender
+-(void)scrollToNextPageAutomatically:(id)sender
 {
     //工作原理：
     
@@ -213,7 +203,7 @@
         
     }
     //拖动完毕的时候 重新开始计时器控制跳转
-    timer = [NSTimer scheduledTimerWithTimeInterval:scheduledtimeInterval target:self selector:@selector(scrollToNextPageautomatically:) userInfo:nil repeats:YES];
+    timer = [NSTimer scheduledTimerWithTimeInterval:scheduledtimeInterval target:self selector:@selector(scrollToNextPageAutomatically:) userInfo:nil repeats:YES];
 
     
 }
