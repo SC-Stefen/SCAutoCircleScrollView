@@ -47,7 +47,4 @@ typedef enum {
 
 - (id)initThePageControlOnScrollViewWithFrame : (CGRect)pageControlFrame andAutoCircleScrollViewWithFrame : (CGRect)scrollViewFrame withViewsArray : (NSArray*)viewsArray withTimeInterval : (NSTimeInterval)timeInterval;
 
-//- (id)initAutoCircleScrollViewWithFrame : (CGRect)scrollViewFrame withViewsArray : (NSArray*)viewsArray;
-
-
 @end

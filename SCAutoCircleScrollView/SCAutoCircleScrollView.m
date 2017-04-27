@@ -7,16 +7,10 @@
 //
 
 #import "SCAutoCircleScrollView.h"
+#import <SDWebImage/UIImageView+WebCache.h>
 
 @implementation SCAutoCircleScrollView
 
-- (id)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-    }
-    return self;
-}
 
 - (id)initThePageControlOnScrollViewWithFrame : (CGRect)pageControlFrame andAutoCircleScrollViewWithFrame : (CGRect)scrollViewFrame withViewsArray : (NSArray*)viewsArray withTimeInterval : (NSTimeInterval)timeInterval {
     
@@ -28,6 +22,8 @@
         _autoCircleScrollViewSelectionType = SCAutoCircleScrollViewSelectionTypeTap;
         
         scrollViewSourceArray = viewsArray;
+        
+        NSLog(@"scrollViewSourceArray = %@", scrollViewSourceArray);
         
         scheduledtimeInterval = timeInterval;
         
@@ -43,11 +39,14 @@
 }
 
 
+
 - (void)initPageControlWithFrame : (CGRect)pageControlFrame andScrollViewsWithFrame: (CGRect)scrollViewFrame {
     
     CGFloat scrollViewWidth = scrollViewFrame.size.width;
     
     CGFloat scrollViewHeight = scrollViewFrame.size.height;
+    
+    
     
     //初始化ScrollView
     
@@ -61,44 +60,48 @@
     
     [self addSubview:_autoCircleScrollView];
     
-    for (int j = 0; j < [scrollViewSourceArray count]; j++) {
-        
-        NSLog(@"[scrollViewSourceArray ojectAtIndex] = %@", [scrollViewSourceArray objectAtIndex:j]);
-    }
-    
-    
     //将要自动循环的视图(UIImageView)添加到ScrollView上
     
     UIImageView *firstImageView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, scrollViewWidth, scrollViewHeight)];
-    firstImageView.image = [UIImage imageNamed:[scrollViewSourceArray lastObject]];  //如果图片保存在远程服务器、本机图片库或者应用程序沙盒中，需要修改一下该方法
+    
+    [firstImageView sd_setImageWithURL:[NSURL URLWithString:[scrollViewSourceArray lastObject]]
+                      placeholderImage:nil];
+    
     [_autoCircleScrollView addSubview:firstImageView];
     
     for (int i = 0; i < [scrollViewSourceArray count]; i++) {
         
         UIImageView *imageview = [[UIImageView alloc]initWithFrame:CGRectMake((i+1)*scrollViewWidth, 0, scrollViewWidth, scrollViewHeight)];
-        imageview.image = [UIImage imageNamed:[scrollViewSourceArray objectAtIndex:i]];
+        
+        [imageview sd_setImageWithURL:[NSURL URLWithString:[scrollViewSourceArray objectAtIndex:i]]
+                     placeholderImage:nil];
+        
         [_autoCircleScrollView addSubview:imageview];
     }
     
     UIImageView *lastImageView = [[UIImageView alloc]initWithFrame:CGRectMake(scrollViewWidth*(scrollViewSourceArray.count+1), 0, scrollViewWidth, scrollViewHeight)];
-    lastImageView.image = [UIImage imageNamed:[scrollViewSourceArray objectAtIndex:0]];
-    [_autoCircleScrollView addSubview:lastImageView];
+    
+    [lastImageView sd_setImageWithURL:[NSURL URLWithString:[scrollViewSourceArray objectAtIndex:0]] placeholderImage:nil completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+        
+        
+        //初始化pageControl
+        _pageControl = [[UIPageControl alloc]initWithFrame:pageControlFrame];
+        _pageControl.numberOfPages = scrollViewSourceArray.count;
+        _pageControl.currentPage = 0;
+        _pageControl.enabled = YES;
+        _pageControl.currentPageIndicatorTintColor = [UIColor redColor];
+        _pageControl.pageIndicatorTintColor = [UIColor whiteColor];
+        
+        [self addSubview:_pageControl];
+        
+        [_autoCircleScrollView addSubview:lastImageView];
+        
+        timer = [NSTimer scheduledTimerWithTimeInterval:scheduledtimeInterval target:self selector:@selector(scrollToNextPageAutomatically:) userInfo:nil repeats:YES];
+    }];
+    
     
     //初始化时，将scrollView上的view设置为第一个view
     [_autoCircleScrollView scrollRectToVisible:CGRectMake(scrollViewWidth, 0, scrollViewWidth, scrollViewHeight) animated:NO];
-    
-    //初始化pageControl
-    _pageControl = [[UIPageControl alloc]initWithFrame:pageControlFrame];
-    _pageControl.numberOfPages = scrollViewSourceArray.count;
-    _pageControl.currentPage = 0;
-    _pageControl.enabled = YES;
-    _pageControl.currentPageIndicatorTintColor = [UIColor redColor];
-    _pageControl.pageIndicatorTintColor = [UIColor whiteColor];
-    
-    [self addSubview:_pageControl];
-    
-    //添加一个定时器，用于scrollView自动循环
-    timer = [NSTimer scheduledTimerWithTimeInterval:scheduledtimeInterval target:self selector:@selector(scrollToNextPageautomatically:) userInfo:nil repeats:YES];
     
     
     //添加一个点击手势，如果ScrollView设置的是可以点击状态，则触发响应的方法
@@ -111,7 +114,7 @@
 
 
 
--(void)scrollToNextPageautomatically:(id)sender
+-(void)scrollToNextPageAutomatically:(id)sender
 {
     //工作原理：
     
@@ -178,6 +181,7 @@
     //开始拖动scrollview的时候 停止计时器控制的跳转
     [timer invalidate];
     
+    
     timer = nil;
 }
 
@@ -212,9 +216,12 @@
         _pageControl.currentPage = currentPage-1;
         
     }
+    
+    
+    
     //拖动完毕的时候 重新开始计时器控制跳转
-    timer = [NSTimer scheduledTimerWithTimeInterval:scheduledtimeInterval target:self selector:@selector(scrollToNextPageautomatically:) userInfo:nil repeats:YES];
-
+    timer = [NSTimer scheduledTimerWithTimeInterval:scheduledtimeInterval target:self selector:@selector(scrollToNextPageAutomatically:) userInfo:nil repeats:YES];
+    
     
 }
 
